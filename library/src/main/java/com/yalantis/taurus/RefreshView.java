@@ -11,11 +11,12 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
+
+import androidx.annotation.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -193,7 +194,7 @@ public class RefreshView extends Drawable implements Drawable.Callback, Animatab
         final int saveCount = canvas.save();
 
         // DRAW BACKGROUND.
-        canvas.drawColor(mContext.getResources().getColor(R.color.sky_background));
+        canvas.drawColor(mParent.getRefreshBg());
 
         if (isRefreshing) {
             // Set up new set of wind
@@ -224,7 +225,7 @@ public class RefreshView extends Drawable implements Drawable.Callback, Animatab
             }
 
             // Draw current set of wind
-            if (mWinds.size() >= WIND_SET_AMOUNT) {
+            if (WIND_SET_AMOUNT <= mWinds.size()) {
                 for (Map.Entry<Float, Float> wind : mWinds.entrySet()) {
                     drawWind(canvas, wind.getKey(), wind.getValue());
                 }

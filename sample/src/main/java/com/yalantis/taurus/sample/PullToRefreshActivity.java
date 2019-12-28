@@ -2,14 +2,15 @@ package com.yalantis.taurus.sample;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.yalantis.taurus.PullToRefreshView;
 
@@ -50,10 +51,10 @@ public class PullToRefreshActivity extends AppCompatActivity {
             sampleList.add(map);
         }
 
-        ListView listView = (ListView) findViewById(R.id.list_view);
+        ListView listView = findViewById(R.id.list_view);
         listView.setAdapter(new SampleAdapter(this, R.layout.list_item, sampleList));
 
-        mPullToRefreshView = (PullToRefreshView) findViewById(R.id.pull_to_refresh);
+        mPullToRefreshView = findViewById(R.id.pull_to_refresh);
         mPullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -87,7 +88,7 @@ public class PullToRefreshActivity extends AppCompatActivity {
             if (convertView == null) {
                 viewHolder = new ViewHolder();
                 convertView = mInflater.inflate(R.layout.list_item, parent, false);
-                viewHolder.textViewName = (TextView) convertView.findViewById(R.id.text_view_name);
+                viewHolder.textViewName = convertView.findViewById(R.id.text_view_name);
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();

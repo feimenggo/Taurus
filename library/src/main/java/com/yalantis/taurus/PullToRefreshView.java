@@ -1,9 +1,8 @@
 package com.yalantis.taurus;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v4.view.ViewCompat;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,8 +12,12 @@ import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
-import android.widget.AbsListView;
 import android.widget.ImageView;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.core.view.MotionEventCompat;
+import androidx.core.view.ViewCompat;
 
 public class PullToRefreshView extends ViewGroup {
 
@@ -43,6 +46,7 @@ public class PullToRefreshView extends ViewGroup {
     private float mFromDragPercent;
     private boolean mNotify;
     private OnRefreshListener mListener;
+    private int mRefreshBg;
 
     public PullToRefreshView(Context context) {
         this(context, null);
@@ -50,6 +54,9 @@ public class PullToRefreshView extends ViewGroup {
 
     public PullToRefreshView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.PullToRefreshView);
+        mRefreshBg = typedArray.getColor(R.styleable.PullToRefreshView_refreshBg, Color.parseColor("#228FC1"));
+        typedArray.recycle();
 
         mDecelerateInterpolator = new DecelerateInterpolator(DECELERATE_INTERPOLATION_FACTOR);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -63,6 +70,14 @@ public class PullToRefreshView extends ViewGroup {
         addView(mRefreshImageView);
         setWillNotDraw(false);
         ViewCompat.setChildrenDrawingOrderEnabled(this, true);
+    }
+
+    public int getRefreshBg() {
+        return mRefreshBg;
+    }
+
+    public void setRefreshBg(@ColorInt int refreshBg) {
+        mRefreshBg = refreshBg;
     }
 
     public int getTotalDragDistance() {
@@ -80,7 +95,8 @@ public class PullToRefreshView extends ViewGroup {
         widthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth() - getPaddingRight() - getPaddingLeft(), MeasureSpec.EXACTLY);
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredHeight() - getPaddingTop() - getPaddingBottom(), MeasureSpec.EXACTLY);
         mTarget.measure(widthMeasureSpec, heightMeasureSpec);
-        mRefreshImageView.measure(widthMeasureSpec, heightMeasureSpec);
+        int refreshMeasureSec = MeasureSpec.makeMeasureSpec((getMeasuredHeight() - getPaddingTop() - getPaddingBottom()) / 5, MeasureSpec.EXACTLY);
+        mRefreshImageView.measure(widthMeasureSpec, refreshMeasureSec);
     }
 
     private void ensureTarget() {
@@ -346,31 +362,17 @@ public class PullToRefreshView extends ViewGroup {
         if (index < 0) {
             return -1;
         }
-        return MotionEventCompat.getY(ev, index);
+        return ev.getY(index);
     }
 
     private void setTargetOffsetTop(int offset, boolean requiresUpdate) {
         mTarget.offsetTopAndBottom(offset);
         mRefreshView.offsetTopAndBottom(offset);
         mCurrentOffsetTop = mTarget.getTop();
-        if (requiresUpdate && android.os.Build.VERSION.SDK_INT < 11) {
-            invalidate();
-        }
     }
 
     private boolean canChildScrollUp() {
-        if (android.os.Build.VERSION.SDK_INT < 14) {
-            if (mTarget instanceof AbsListView) {
-                final AbsListView absListView = (AbsListView) mTarget;
-                return absListView.getChildCount() > 0
-                        && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
-                        .getTop() < absListView.getPaddingTop());
-            } else {
-                return mTarget.getScrollY() > 0;
-            }
-        } else {
-            return ViewCompat.canScrollVertically(mTarget, -1);
-        }
+        return mTarget.canScrollVertically(-1);
     }
 
     @Override
